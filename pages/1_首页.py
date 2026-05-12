@@ -46,22 +46,28 @@ with st.expander("🛒 发起模拟交易订单", expanded=True):
         user_id = st.number_input("用户 ID", min_value=1000, value=6147, step=1)
         order_type = st.selectbox("交易类型", ["buy", "sell"])
     with col_b:
-        amount = st.number_input("交易金额 (USDT)", min_value=5.0, value=6000.0, step=1.0)  # ← 已放宽限制
+        amount = st.number_input("交易金额 (USDT)", min_value=5.0, value=6000.0, step=1.0)
         asset = st.selectbox("资产", ["USDT", "BTC", "ETH"])
 
     if st.button("🚀 提交订单（模拟撮合）", type="primary"):
+        now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # 统一精确到秒
+        
         c.execute("""
-            INSERT INTO orders (user_id, order_type, amount, asset, price, status)
-            VALUES (?, ?, ?, ?, ?, 'completed')
-        """, (user_id, order_type, amount, asset, round(random.uniform(0.8, 1.2), 4)))
+            INSERT INTO orders (user_id, order_type, amount, asset, price, status, created_at)
+            VALUES (?, ?, ?, ?, ?, 'completed', ?)
+        """, (user_id, order_type, amount, asset, round(random.uniform(0.8, 1.2), 4), now_time))
         conn.commit()
         
         if amount >= 50000:
             st.error(f"🚨 大额交易告警！金额 {amount:,.0f} USDT")
+            
+            # --- 关键修改点：统一标签文字 ---
+            reason = "大额交易 (≥50,000 USDT)" 
+            
             c.execute("""
-                INSERT INTO risk_alerts (user_id, amount, address, tx_type, tx_time)
-                VALUES (?, ?, ?, ?, ?)
-            """, (user_id, amount, "0x34......ab7865", "大额交易", datetime.now().strftime("%Y-%m-%d %H:%M")))
+                INSERT INTO risk_alerts (user_id, amount, address, tx_type, tx_time, status)
+                VALUES (?, ?, ?, ?, ?, '未处理')
+            """, (user_id, amount, "0x34......ab7865", reason, now_time))
             conn.commit()
             st.success("✅ 订单已撮合 + 告警已推送！")
         else:
@@ -72,7 +78,6 @@ with st.expander("🛒 发起模拟交易订单", expanded=True):
 # ==================== 实时交易监控面板 ====================
 st.subheader("📊 实时交易监控面板")
 st.caption("展示所有历史订单 + 大额交易检测")
-
 orders = c.execute("""
     SELECT user_id, order_type, amount, asset, created_at 
     FROM orders 
@@ -89,11 +94,9 @@ else:
 
 st.markdown("---")
 
-# ==================== 今日实时告警预览（只显示最近24小时大额告警） ====================
-st.subheader("🚨 今日实时告警预览（联动 AML）")
+# ==================== 今日实时告警预览 ====================
+st.subheader("🚨 今日实时告警预览（最近24小时大额）")
 st.caption("主要展示最近24小时内的大额交易告警")
-
-# 只显示最近24小时的大额交易（≥50000 USDT）
 recent_alert_orders = c.execute("""
     SELECT user_id, order_type, amount, asset, created_at 
     FROM orders 
@@ -105,9 +108,7 @@ recent_alert_orders = c.execute("""
 if recent_alert_orders:
     for uid, otype, amt, ast, t in recent_alert_orders:
         tx_type = "BUY" if otype == "buy" else "SELL"
-        st.error(f"""
-            **用户ID: {uid}** | {tx_type} **{amt:,.0f} {ast}** | 时间: {t}
-        """, icon="🚨")
+        st.error(f"**用户ID: {uid}** | {tx_type} **{amt:,.0f} {ast}** | 时间: {t}", icon="🚨")
 else:
     st.info("最近24小时内暂无大额告警记录")
 
