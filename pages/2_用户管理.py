@@ -32,16 +32,16 @@ with st.form("user_register", clear_on_submit=True):
     
     submitted = st.form_submit_button("🚀 注册")
 
-# 人脸验证（轮流）
+# 人脸扫描（轮流）
 if "face_verify_state" not in st.session_state:
     st.session_state.face_verify_state = True
 
-if st.button("🪪 人脸验证模拟"):
+if st.button("🪪 人脸扫描模拟"):
     st.session_state.face_verify_state = not st.session_state.face_verify_state
     if st.session_state.face_verify_state:
-        st.success("✅ 人脸活体验证通过！")
+        st.success("✅ 人脸扫描完成！")
     else:
-        st.error("❌ 人脸活体不匹配！")
+        st.error("❌ 人脸扫描失败！")
 
 # 注册逻辑
 if submitted:
@@ -52,7 +52,7 @@ if submitted:
     elif not password:
         st.error("❌ 密码不能为空")
     elif not st.session_state.face_verify_state:
-        st.error("❌ 人脸活体验证未通过，无法完成注册")
+        st.error("❌ 人脸扫描失败，无法完成注册")
     else:
         try:
             new_id = random.randint(1000, 9999)
