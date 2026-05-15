@@ -81,6 +81,6 @@ with col1:
 with col2:
     st.error("🚨 用户ID: 5678 | 金额: **250000 USDT** | 地址: 0xblack...list")
     st.write("**交易时间**: 2026-05-04 10:30:54")
-    st.write("**告警原因**: 大额提币 + 命中地址黑名单")
+    st.write("**告警原因**: 大额交易 (≥50,000 USDT) + 命中地址黑名单")
 
 conn.close()

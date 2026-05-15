@@ -46,7 +46,7 @@ raw_alerts = [{"id": r[0], "user_id": r[1], "amount": r[2], "reason": r[3], "tim
 # 静态演示案例数据
 static_alerts = [
     {"id": 9991, "user_id": 1976, "amount": 60000, "reason": "大额交易 (≥50,000 USDT)", "time": "2026-05-04 18:00:01", "status": "未处理"},
-    {"id": 9992, "user_id": 5678, "amount": 250000, "reason": "大额提币 + 命中地址黑名单", "time": "2026-05-04 10:30:54", "status": "未处理"},
+    {"id": 9992, "user_id": 5678, "amount": 250000, "reason": "大额交易 (≥50,000 USDT) + 命中地址黑名单", "time": "2026-05-04 10:30:54", "status": "未处理"},
     {"id": 9993, "user_id": 1002, "amount": 50050, "reason": "大额交易 (≥50,000 USDT)", "time": "2026-05-04 10:30:54", "status": "已处理"}
 ]
 

@@ -4,7 +4,7 @@ from datetime import datetime
 
 st.set_page_config(page_title="提现风控", layout="wide")
 st.title("💰 提现风控模块")
-st.caption("提现限额分层 + 黑名单审核 | 对应报告 4.1 ~ 4.4")
+st.caption("提现限额分层 + 黑名单管理 + 多重审核流程")
 
 conn = sqlite3.connect("risk_control.db")
 c = conn.cursor()
@@ -21,13 +21,13 @@ with st.expander("🧹 测试数据管理", expanded=False):
 st.markdown("---")
 
 # ==================== 4.1 提现限额分层规则 ====================
-st.subheader("📏 提现限额分层规则（KYC 3 层）")
+st.subheader("📏 提现限额分层规则")
 
 limit_data = {
     0: {"name": "未认证（游客）", "base": 0},
-    1: {"name": "KYC 1 - 手机/邮箱认证", "base": 10000},
-    2: {"name": "KYC 2 - 身份证+人脸认证", "base": 50000},
-    3: {"name": "KYC 3 - 机构/高级认证", "base": 200000}
+    1: {"name": "KYC 1 - 手机/邮箱认证", "base": 100},
+    2: {"name": "KYC 2 - 身份证+人脸认证", "base": 5000},
+    3: {"name": "KYC 3 - 机构/高级认证", "base": 20000}
 }
 
 col1, col2 = st.columns(2)
@@ -77,12 +77,24 @@ with st.form("withdraw_form"):
         elif amount > final_limit:
             st.error(f"❌ 超出当日限额！当前限额 {final_limit:,} USDT")
         else:
-            status = "已拦截 - 命中黑名单" if address.strip() in blacklist_list else "待初审"
-            c.execute("INSERT INTO withdrawals (user_id, amount, address, status, created_at) VALUES (?, ?, ?, ?, ?)",
-                     (user_id, amount, address, status, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            is_blacklisted = address.strip() in blacklist_list
+            if is_blacklisted:
+                status = "已拦截 - 命中黑名单"
+            elif risk_level == "低风险":
+                status = "已通过"   # 低风险 + 非黑名单 自动通过
+            else:
+                status = "待初审"
+            
+            c.execute("""
+                INSERT INTO withdrawals (user_id, amount, address, status, kyc_level, risk_level, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (user_id, amount, address, status, kyc_level, risk_level, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             conn.commit()
-            if "拦截" in status:
+            
+            if is_blacklisted:
                 st.error("❌ 地址命中黑名单！已自动拦截")
+            elif status == "已通过":
+                st.success(f"✅ 低风险用户，提现申请自动通过！（{amount:,.0f} USDT）")
             else:
                 st.success(f"✅ 提现申请已提交（{amount:,.0f} USDT）")
                 st.info("→ 已进入多重审核流程")
@@ -92,21 +104,20 @@ st.markdown("---")
 # ==================== 待审核提现记录 ====================
 st.subheader("🔍 待审核提现记录（多重审核）")
 records = c.execute("""
-    SELECT id, user_id, amount, address, status, created_at 
+    SELECT id, user_id, amount, address, status, kyc_level, risk_level, created_at 
     FROM withdrawals 
     ORDER BY created_at DESC
 """).fetchall()
 
-for rid, uid, amt, addr, status, t in records:
+for rid, uid, amt, addr, status, kyc, risk, t in records:
     with st.container(border=True):
         col_a, col_b = st.columns([6, 3])
         with col_a:
-            st.write(f"**用户ID**: {uid} | **金额**: {amt:,.0f} USDT")
+            st.write(f"**用户ID**: {uid} | **金额**: {amt:,.0f} USDT | **KYC**: {kyc} | **风险**: {risk}")
             st.write(f"**地址**: `{addr}` | **时间**: {t}")
         with col_b:
             st.write(f"**状态**: **{status}**")
             
-            # 初审按钮
             if status == "待初审" or "拦截" in status:
                 if st.button("✅ 初审通过", key=f"first_{rid}"):
                     c.execute("UPDATE withdrawals SET status='待复审' WHERE id=?", (rid,))
@@ -116,8 +127,6 @@ for rid, uid, amt, addr, status, t in records:
                     c.execute("UPDATE withdrawals SET status='已拒绝' WHERE id=?", (rid,))
                     conn.commit()
                     st.rerun()
-            
-            # 复审按钮
             elif status == "待复审":
                 if st.button("✅ 复审通过", key=f"final_{rid}"):
                     c.execute("UPDATE withdrawals SET status='已通过' WHERE id=?", (rid,))
@@ -128,5 +137,4 @@ for rid, uid, amt, addr, status, t in records:
                     conn.commit()
                     st.rerun()
 
-st.info("👈 左侧选择不同模块进入对应功能区")
 conn.close()
