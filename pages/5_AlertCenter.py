@@ -4,7 +4,7 @@ from datetime import datetime
 
 st.set_page_config(page_title="告警中心", layout="wide")
 st.title("🚨 告警中心仪表盘")
-st.caption("统一告警管理平台 | 对应报告 3.3")
+st.caption("统一告警管理平台")
 
 # ==================== 1. 详情处理弹窗（仅查看模式） ====================
 @st.dialog("🚨 告警详情处理")

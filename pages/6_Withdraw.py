@@ -102,7 +102,7 @@ with st.form("withdraw_form"):
 st.markdown("---")
 
 # ==================== 待审核提现记录 ====================
-st.subheader("🔍 待审核提现记录（多重审核）")
+st.subheader("🔍 提现记录（多重审核）")
 records = c.execute("""
     SELECT id, user_id, amount, address, status, kyc_level, risk_level, created_at 
     FROM withdrawals 
