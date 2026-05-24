@@ -1,11 +1,11 @@
 import streamlit as st
 import sqlite3
-from datetime import datetime
+from datetime import datetime, date
 import random
 
 st.set_page_config(page_title="资金对账", layout="wide")
 st.title("🔄 资金对账与异常告警系统")
-st.caption("资金安全与对账 | 对应报告 第5章")
+st.caption("资金安全与对账")
 
 conn = sqlite3.connect("risk_control.db")
 c = conn.cursor()
@@ -100,22 +100,31 @@ if abnormal_records:
 else:
     st.success("🎉 当前暂无异常资金记录")
 
-# ==================== 5.3 对账报告生成 ====================
-st.subheader("📄 5.3 对账报告生成示例")
+st.markdown("---")
 
-if st.button("📊 生成今日对账报告", type="primary"):
-    total_checks = len(records)
-    abnormal_count = len(abnormal_records)
-    st.success(f"✅ 对账报告生成成功！")
-    st.write(f"**报告时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    st.write(f"**总对账次数**: {total_checks} 次")
-    st.write(f"**异常次数**: {abnormal_count} 次")
-    st.write(f"**总体状态**: {'正常' if abnormal_count == 0 else '存在异常'}")
+# ==================== 5.3 对账报告生成 ====================
+st.subheader("📄 对账报告生成")
+
+selected_date = st.date_input("选择报告日期", date.today())
+selected_str = selected_date.strftime("%Y-%m-%d")
+
+if st.button("📊 生成对账报告", type="primary"):
+    total = c.execute("SELECT COUNT(*) FROM fund_reconciliation WHERE created_at LIKE ?", (selected_str + "%",)).fetchone()[0]
+    abnormal_total = c.execute("SELECT COUNT(*) FROM fund_reconciliation WHERE (status = '异常' OR status = '已处理') AND created_at LIKE ?", (selected_str + "%",)).fetchone()[0]
+    abnormal_unprocessed = c.execute("SELECT COUNT(*) FROM fund_reconciliation WHERE status = '异常' AND created_at LIKE ?", (selected_str + "%",)).fetchone()[0]
+    abnormal_processed = abnormal_total - abnormal_unprocessed
+    
+    st.success(f"✅ {selected_str} 对账报告生成成功！")
+    st.write(f"**报告日期**: {selected_str}")
+    st.write(f"**总对账次数**: {total} 次")
+    st.write(f"**异常发生次数**: {abnormal_total} 次（含已处理）")
+    st.write(f"**未处理异常**: {abnormal_unprocessed} 次")
+    st.write(f"**已处理异常**: {abnormal_processed} 次")
 
 st.info("👈 左侧选择不同模块进入对应功能区")
 conn.close()
 
-# ==================== 弹窗部分（保持不变） ====================
+# ==================== 弹窗 ====================
 @st.dialog("异常处理")
 def show_processing_dialog():
     rid, time, ctype, diff = st.session_state.selected_record
