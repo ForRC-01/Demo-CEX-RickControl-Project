@@ -4,12 +4,11 @@ from datetime import datetime
 
 st.set_page_config(page_title="应急响应", layout="wide")
 st.title("🚨 应急响应与紧急暂停系统")
-st.caption("重大风险事件处置 | 对应报告 第6章")
-
-conn = sqlite3.connect("risk_control.db")
-c = conn.cursor()
+st.caption("重大风险事件处置")
 
 # ==================== 创建历史记录表 ====================
+conn = sqlite3.connect("risk_control.db")
+c = conn.cursor()
 c.execute("""
     CREATE TABLE IF NOT EXISTS emergency_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,13 +18,16 @@ c.execute("""
     )
 """)
 conn.commit()
+conn.close()
 
 # ==================== 测试数据管理 ====================
 with st.expander("🧹 测试数据管理", expanded=False):
     st.warning("⚠️ 此操作仅清空紧急暂停历史记录")
     if st.button("🗑️ 一键清除紧急暂停历史记录", type="secondary"):
-        c.execute("DELETE FROM emergency_history")
+        conn = sqlite3.connect("risk_control.db")
+        conn.execute("DELETE FROM emergency_history")
         conn.commit()
+        conn.close()
         st.success("✅ 已清除所有紧急暂停历史记录！")
         st.rerun()
 
@@ -53,13 +55,15 @@ else:
 
 st.markdown("---")
 
-# ==================== 紧急暂停历史记录（按时间倒序） ====================
+# ==================== 紧急暂停历史记录 ====================
 st.subheader("📜 紧急暂停历史记录（永久保存）")
-history = c.execute("""
+conn = sqlite3.connect("risk_control.db")
+history = conn.execute("""
     SELECT id, action, reason, time 
     FROM emergency_history 
     ORDER BY time DESC
 """).fetchall()
+conn.close()
 
 for hid, action, reason, time in history:
     with st.container(border=True):
@@ -77,9 +81,11 @@ def pause_dialog():
     if st.button("确认启动", type="primary"):
         if reason.strip():
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            c.execute("INSERT INTO emergency_history (action, reason, time) VALUES (?, ?, ?)",
-                     ("🚨 启动紧急暂停", reason.strip(), now))
+            conn = sqlite3.connect("risk_control.db")
+            conn.execute("INSERT INTO emergency_history (action, reason, time) VALUES (?, ?, ?)",
+                        ("🚨 启动紧急暂停", reason.strip(), now))
             conn.commit()
+            conn.close()
             
             st.session_state.emergency_stop = True
             st.session_state.stop_reason = reason.strip()
@@ -92,9 +98,11 @@ def resume_dialog():
     if st.button("确认解除", type="primary"):
         if reason.strip():
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            c.execute("INSERT INTO emergency_history (action, reason, time) VALUES (?, ?, ?)",
-                     ("✅ 解除紧急暂停", reason.strip(), now))
+            conn = sqlite3.connect("risk_control.db")
+            conn.execute("INSERT INTO emergency_history (action, reason, time) VALUES (?, ?, ?)",
+                        ("✅ 解除紧急暂停", reason.strip(), now))
             conn.commit()
+            conn.close()
             
             st.session_state.emergency_stop = False
             st.session_state.stop_reason = ""
@@ -123,4 +131,3 @@ if st.session_state.get("show_history", False):
     st.session_state.show_history = False
 
 st.info("👈 左侧选择不同模块进入对应功能区")
-conn.close()
