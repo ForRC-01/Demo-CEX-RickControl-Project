@@ -62,14 +62,20 @@ st.markdown("---")
 
 # ==================== 模拟提现申请 ====================
 st.subheader("🧾 模拟提现申请")
+
 with st.form("withdraw_form"):
     user_id = st.number_input("提现用户 ID", min_value=1000, value=1900)
     amount = st.number_input("提现金额 (USDT)", min_value=5.0, value=15000.0, step=100.0)
     address = st.text_input("提现地址", value="0x1234567890abcdef1234567890abcdef12345678")
     
-    submitted = st.form_submit_button("提交提现申请", type="primary")
+    # ==================== 紧急暂停检查（仅此部分修改） ====================
+    if st.session_state.get('emergency_stop', False):
+        st.error("🚨 系统已紧急暂停！所有提现功能已被冻结。")
+        submitted = st.form_submit_button("提交提现申请", type="primary", disabled=True)
+    else:
+        submitted = st.form_submit_button("提交提现申请", type="primary")
 
-    if submitted:
+    if submitted and not st.session_state.get('emergency_stop', False):
         blacklist_list = [line.strip() for line in blacklist_text.splitlines() if line.strip()]
 
         if final_limit == 0:
@@ -81,7 +87,7 @@ with st.form("withdraw_form"):
             if is_blacklisted:
                 status = "已拦截 - 命中黑名单"
             elif risk_level == "低风险":
-                status = "已通过"   # 低风险 + 非黑名单 自动通过
+                status = "已通过"
             else:
                 status = "待初审"
             

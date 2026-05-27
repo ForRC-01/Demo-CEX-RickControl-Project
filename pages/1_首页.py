@@ -49,31 +49,32 @@ with st.expander("🛒 发起模拟交易订单", expanded=True):
         amount = st.number_input("交易金额 (USDT)", min_value=5.0, value=6000.0, step=1.0)
         asset = st.selectbox("资产", ["USDT", "BTC", "ETH"])
 
-    if st.button("🚀 提交订单（模拟撮合）", type="primary"):
-        now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # 统一精确到秒
-        
-        c.execute("""
-            INSERT INTO orders (user_id, order_type, amount, asset, price, status, created_at)
-            VALUES (?, ?, ?, ?, ?, 'completed', ?)
-        """, (user_id, order_type, amount, asset, round(random.uniform(0.8, 1.2), 4), now_time))
-        conn.commit()
-        
-        if amount >= 50000:
-            st.error(f"🚨 大额交易告警！金额 {amount:,.0f} USDT")
-            
-            # --- 关键修改点：统一标签文字 ---
-            reason = "大额交易 (≥50,000 USDT)" 
+    # ==================== 紧急暂停检查（仅此部分修改） ====================
+    if st.session_state.get('emergency_stop', False):
+        st.error("🚨 系统已紧急暂停！所有交易功能已被冻结。")
+    else:
+        if st.button("🚀 提交订单（模拟撮合）", type="primary"):
+            now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
             c.execute("""
-                INSERT INTO risk_alerts (user_id, amount, address, tx_type, tx_time, status)
-                VALUES (?, ?, ?, ?, ?, '未处理')
-            """, (user_id, amount, "0x34......ab7865", reason, now_time))
+                INSERT INTO orders (user_id, order_type, amount, asset, price, status, created_at)
+                VALUES (?, ?, ?, ?, ?, 'completed', ?)
+            """, (user_id, order_type, amount, asset, round(random.uniform(0.8, 1.2), 4), now_time))
             conn.commit()
-            st.success("✅ 订单已撮合 + 告警已推送！")
-        else:
-            st.success("✅ 订单正常撮合完成（无异常）")
-        
-        st.rerun()
+            
+            if amount >= 50000:
+                st.error(f"🚨 大额交易告警！金额 {amount:,.0f} USDT")
+                reason = "大额交易 (≥50,000 USDT)" 
+                c.execute("""
+                    INSERT INTO risk_alerts (user_id, amount, address, tx_type, tx_time, status)
+                    VALUES (?, ?, ?, ?, ?, '未处理')
+                """, (user_id, amount, "0x34......ab7865", reason, now_time))
+                conn.commit()
+                st.success("✅ 订单已撮合 + 告警已推送！")
+            else:
+                st.success("✅ 订单正常撮合完成（无异常）")
+            
+            st.rerun()
 
 # ==================== 实时交易监控面板 ====================
 st.subheader("📊 实时交易监控面板")
