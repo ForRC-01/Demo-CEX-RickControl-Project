@@ -4,10 +4,10 @@ import random
 from datetime import datetime
 
 st.set_page_config(page_title="CEX 风险控制仪表盘", layout="wide")
-st.title("🔥 CEX 风险控制仪表盘")
-st.caption(f"基于 SlowMist 安全实践要求 | 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+st.title("🔥 风险控制仪表盘")
+st.caption(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-st.success("✅ 项目框架初始化成功！")
+st.success("系统风控状态总览")
 
 conn = sqlite3.connect("risk_control.db")
 c = conn.cursor()

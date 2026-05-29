@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 
 st.set_page_config(page_title="提现风控", layout="wide")
-st.title("💰 提现风控模块")
+st.title("💰 提现审核")
 st.caption("提现限额分层 + 黑名单管理 + 多重审核流程")
 
 conn = sqlite3.connect("risk_control.db")

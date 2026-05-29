@@ -1,24 +1,56 @@
 import streamlit as st
 from datetime import datetime
 
-st.set_page_config(page_title="CEX 风险控制仪表盘", layout="wide")
-st.title("🔥 CEX 风险控制仪表盘")
-st.caption(f"基于 SlowMist 安全实践要求 | 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+st.set_page_config(page_title="CEX 风险控制系统", layout="wide")
 
-st.success("✅ 项目框架初始化成功！")
+# ==================== 进入页面即放气球 ====================
+st.balloons()
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric("总资产 (USDT)", "248,392", "+2.4%")
-with col2:
-    st.metric("风险总分", "23", "-4")
-with col3:
-    st.metric("今日告警", "7", "🔴")
-with col4:
-    st.metric("提币通过率", "96.8%", "+0.8%")
+# ==================== 页面标题 ====================
+st.markdown("""
+    <h1 style='text-align: center; color: #1E88E5; margin-bottom: 0;'>
+        基于 Streamlit 的模拟“交易所风控系统”
+    </h1>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
-st.info("👈 左侧选择不同模块进入对应功能区")
 
-st.subheader("近期风险趋势")
-st.caption("（后续接入真实数据后这里会显示图表）")
+# ==================== 项目背景与目标 ====================
+st.subheader("📌 项目背景与目标")
+
+st.write("""
+**作者在求职风控岗位时，经常因为“没有交易所风控经验”而被拒绝**，深感无奈。  
+这是一个典型的恶性循环：**没有经验就不给机会，而没有机会就无法积累经验**。
+
+为了打破这一怪圈，作者决定**自己动手搭建一个模拟交易所风控系统**，把真实交易所风控的核心工作全部模拟实操一遍。通过这个项目，为自己创造宝贵的实战经验，也为后续求职和职业发展奠定坚实基础。
+""")
+
+st.markdown("---")
+
+# ==================== 项目系统介绍 ====================
+st.subheader("🚀 项目系统介绍")
+
+st.write("""
+这是一个**模拟交易所风险控制演示系统**。  
+
+采用 **Streamlit 多页面框架 + SQLite 数据库 + GitHub Codespaces** 技术栈，完整实现了从**用户注册与 KYC 认证、AML 反洗钱监控、实时交易风控、提现多重审核、资金对账，到紧急暂停开关及事后报告模板**的全链路风控功能。
+
+系统以**交互式演示**为核心，覆盖了事前预防、事中监控、事后复盘的完整闭环，具备一键告警扫描、多级审核联动、全局紧急暂停、标准化事后报告等实用特性。
+
+通过本项目，直观展示了交易所风险控制的主要流程与关键技术实现，为新创交易所搭建风控体系提供了**清晰、可操作、可参考**的示范平台。
+""")
+
+st.markdown("---")
+
+# ==================== 项目亮点（可选美化） ====================
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric("核心模块", "9 个", "完整覆盖")
+with col2:
+    st.metric("交互演示", "丰富", "一键操作")
+with col3:
+    st.metric("部署状态", "在线", "Streamlit Cloud")
+
+st.info("👈 请从左侧菜单选择不同模块进入对应功能区进行体验")
+
+st.caption(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

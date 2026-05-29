@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 
 st.set_page_config(page_title="告警中心", layout="wide")
-st.title("🚨 告警中心仪表盘")
+st.title("🚨 告警中心")
 st.caption("统一告警管理平台")
 
 # ==================== 1. 详情处理弹窗（仅查看模式） ====================

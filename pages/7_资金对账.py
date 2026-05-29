@@ -4,7 +4,7 @@ from datetime import datetime, date
 import random
 
 st.set_page_config(page_title="资金对账", layout="wide")
-st.title("🔄 资金对账与异常告警系统")
+st.title("🔄 资金对账与异常告警")
 st.caption("资金安全与对账")
 
 conn = sqlite3.connect("risk_control.db")

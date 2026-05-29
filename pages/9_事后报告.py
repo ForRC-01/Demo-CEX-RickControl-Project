@@ -80,7 +80,7 @@ with st.expander("📝 填写并生成新报告", expanded=True):
 st.markdown("---")
 
 # ==================== 历史报告模块 ====================
-st.subheader("📜 历史事后报告（按时间倒序）")
+st.subheader("📜 历史事后报告")
 
 conn = sqlite3.connect("risk_control.db")
 reports = conn.execute("""

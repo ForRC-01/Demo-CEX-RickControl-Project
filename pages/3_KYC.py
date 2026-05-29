@@ -1,7 +1,7 @@
 import streamlit as st
 import sqlite3
 
-st.title("🛡️ KYC 审核流程")
+st.title("🛡️ KYC 审核")
 st.caption("待审核列表 + KYC审核记录（自动+人工混合审核模式）")
 
 conn = sqlite3.connect("risk_control.db")

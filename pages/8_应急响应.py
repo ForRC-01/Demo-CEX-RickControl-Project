@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 
 st.set_page_config(page_title="应急响应", layout="wide")
-st.title("🚨 应急响应与紧急暂停系统")
+st.title("🚨 应急响应与紧急暂停")
 st.caption("重大风险事件处置")
 
 # ==================== 创建历史记录表 ====================
