@@ -51,6 +51,18 @@ with col2:
 with col3:
     st.metric("部署状态", "在线", "Streamlit Cloud")
 
+# ==================== 新增：醒目报告按钮 ====================
+st.markdown("---")
+st.subheader("📄 项目完整报告")
+st.markdown("""
+    <a href="https://drive.google.com/file/d/1dq68x8MDhtwIPZtQnC6x40evZiUlFTKI/view?usp=sharing" target="_blank">
+        <button style="background-color:#1E88E5; color:white; padding:12px 24px; font-size:18px; border:none; border-radius:8px; cursor:pointer;">
+            📖 点击查看完整项目报告（PDF）
+        </button>
+    </a>
+""", unsafe_allow_html=True)
+st.caption("（建议在新标签页打开，边看报告边操作 Demo 系统）")
+
 st.info("👈 请从左侧菜单选择不同模块进入对应功能区进行体验")
 
 st.caption(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
