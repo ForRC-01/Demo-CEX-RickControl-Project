@@ -53,7 +53,7 @@ if submitted:
     elif not password:
         st.error("❌ 密码不能为空")
     elif not st.session_state.face_verify_state:
-        st.error("❌ 请先完成人脸扫描验证！")
+        st.error("❌ 请先完成人脸扫描！")
     else:
         try:
             new_id = random.randint(1000, 9999)
