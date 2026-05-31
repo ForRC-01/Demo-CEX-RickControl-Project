@@ -22,6 +22,18 @@ if "register_success" in st.session_state:
 
 # ==================== 新用户注册 ====================
 st.subheader("📝 新用户注册")
+
+# 人脸扫描（必须先完成）
+if "face_verify_state" not in st.session_state:
+    st.session_state.face_verify_state = False
+
+if st.button("🪪 人脸扫描模拟"):
+    st.session_state.face_verify_state = not st.session_state.face_verify_state
+    if st.session_state.face_verify_state:
+        st.success("✅ 人脸扫描完成！")
+    else:
+        st.error("❌ 人脸扫描失败！")
+
 with st.form("user_register", clear_on_submit=True):
     account = st.text_input("账号（邮箱/手机号）")
     username = st.text_input("👤 用户名")
@@ -32,18 +44,7 @@ with st.form("user_register", clear_on_submit=True):
     
     submitted = st.form_submit_button("🚀 注册")
 
-# 人脸扫描（轮流）
-if "face_verify_state" not in st.session_state:
-    st.session_state.face_verify_state = True
-
-if st.button("🪪 人脸扫描模拟"):
-    st.session_state.face_verify_state = not st.session_state.face_verify_state
-    if st.session_state.face_verify_state:
-        st.success("✅ 人脸扫描完成！")
-    else:
-        st.error("❌ 人脸扫描失败！")
-
-# 注册逻辑
+# 注册逻辑（加强校验）
 if submitted:
     if not account:
         st.error("❌ 账号（邮箱/手机号）不能为空")
@@ -52,15 +53,13 @@ if submitted:
     elif not password:
         st.error("❌ 密码不能为空")
     elif not st.session_state.face_verify_state:
-        st.error("❌ 人脸扫描失败，无法完成注册")
+        st.error("❌ 请先完成人脸扫描验证！")
     else:
         try:
             new_id = random.randint(1000, 9999)
             
-            # 检查用户名是否已存在
             if c.execute("SELECT 1 FROM users WHERE username = ?", (username,)).fetchone():
                 st.error("❌ 用户名已存在，请更换用户名")
-            # 新增：检查账号是否已存在
             elif c.execute("SELECT 1 FROM users WHERE email = ? OR phone = ?", (account, account)).fetchone():
                 st.error("❌ 该账号（邮箱/手机号）已存在，请使用其他账号")
             else:
@@ -78,6 +77,8 @@ if submitted:
                     用户名: **{username}**  
                     账号: **{account}**
                 """
+                # 注册成功后重置人脸验证状态
+                st.session_state.face_verify_state = False
                 st.rerun()
                 
         except Exception as e:
