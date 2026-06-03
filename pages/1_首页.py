@@ -27,7 +27,7 @@ st.markdown("---")
 
 # ==================== 测试数据管理 ====================
 with st.expander("🧹 测试数据管理", expanded=False):
-    st.warning("⚠️ 此操作将清除所有模拟的订单、提现申请和告警记录")
+    st.warning("⚠️ 此操作将清除所有模拟的订单和告警记录")
     if st.button("🗑️ 一键清除所有测试数据", type="secondary"):
         c.execute("DELETE FROM orders")
         c.execute("DELETE FROM withdrawals")
